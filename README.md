@@ -17,7 +17,7 @@ import { get, listPaths } from "sendero";
 ```
 
 ## basic usage
-```html
+```js
 data = {
   "agency": "GSA",
   "measurementType": {
