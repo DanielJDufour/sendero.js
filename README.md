@@ -64,6 +64,19 @@ get(data, 'releases__permissions__licenses__name');
 ```
 
 # advanced usage
+## clean
+Filter out null, undefined, and empty strings.
+```js
+
+// dirty
+get(data, "releases.license", { clean: false }));
+[ null, 'https://creativecommons.org/publicdomain/zero/1.0', null, null, ... ]
+
+// clean
+get(data, "releases.license", { clean: true }));
+[ 'https://creativecommons.org/publicdomain/zero/1.0', 'https://github.com/GSA/open.gsa.gov/blob/gh-pages/TERMS.md', ... ]
+```
+
 ## unique
 If you only want unique results returned:
 ```js
@@ -91,4 +104,21 @@ get(data, 'releases--tags', { sep: '--' });
 
 // accepts releases--tags and releases__tags
 get(data, 'releases--tags', { sep: ['--', '__'] });
+```
+
+## stringify
+```js
+// converts numbers to strings
+get(data, "releases.laborHours", { stringify: true, unique: true });
+["0", "200", "12345" ]
+
+// convert objects to JSON strings
+get(data, "releases.permissions", { stringify: true, unique: true });
+[
+  '{"licenses":null,"usageType":"governmentWideReuse"}',
+  '{"licenses":[{"URL":"http://choosealicense.com/licenses/mit/","name":"mit"}],"usageType":"openSource"}',
+  '{"licenses":[{"URL":"http://choosealicense.com/licenses/gpl-3.0/","name":"gpl-3.0"}],"usageType":"openSource"}',
+  '{"licenses":null,"usageType":"openSource"}',
+  // ...
+]
 ```
