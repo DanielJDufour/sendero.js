@@ -39,6 +39,6 @@
   },
   "homepage": "https://github.com/DanielJDufour/sendero.js#readme",
   "devDependencies": {
-    "flug": "^2.2.0"
+    "flug": "^2.4.0"
   }
 }
