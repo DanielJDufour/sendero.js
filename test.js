@@ -147,9 +147,11 @@ test("multipoint geometry", ({ eq }) => {
     coordinates: [
       [100.0, 0.0],
       [101.0, 1.0]
-    ]
+    ],
+    ignore_this: [], // ignore empty arrays
+    ignore_that: [[], []] // ignore empty multidimensional arrays
   };
-  // eq(listPaths(multipoint), ["coordinates", "type"]);
+  eq(listPaths(multipoint), ["coordinates", "type"]);
 });
 
 test("clean", ({ eq }) => {
@@ -160,6 +162,9 @@ test("clean", ({ eq }) => {
 test("stringify", ({ eq }) => {
   eq(get(data, "releases.laborHours", { stringify: true, unique: true }), ["0"]);
 
-  eq(get(data, "releases.permissions", { stringify: true, unique: true }));
-  ["0", "200", "12345"]; // converts objects to strings
+  eq(get(data, "releases.permissions", { stringify: true, unique: true }).slice(0, 3), [
+    '{"licenses":null,"usageType":"governmentWideReuse"}',
+    '{"licenses":[{"URL":"http://choosealicense.com/licenses/mit/","name":"mit"}],"usageType":"openSource"}',
+    '{"licenses":[{"URL":"http://choosealicense.com/licenses/gpl-3.0/","name":"gpl-3.0"}],"usageType":"openSource"}'
+  ]);
 });
