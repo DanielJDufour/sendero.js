@@ -1,11 +1,13 @@
 function get(data, path, options) {
-  const uniq = arr => arr.filter((it, i) => arr.indexOf(it) === i);
+  if (!options) options = {};
+
+  const stringify = it => (typeof it === "object" ? JSON.stringify(it) : "" + it);
 
   if (typeof path === "string") {
     let seps = [".", "__"]; // default
-    if (options && typeof options.sep === "string") {
+    if (typeof options.sep === "string") {
       seps = [options.sep];
-    } else if (options && Array.isArray(options.sep)) {
+    } else if (Array.isArray(options.sep)) {
       seps = options.sep;
     }
 
@@ -57,10 +59,28 @@ function get(data, path, options) {
     previous = active;
   }
 
-  let results = previous.map(p => (typeof p === "object" ? JSON.stringify(p) : p));
+  let results = previous;
 
-  if (options && options.unique) results = uniq(results);
-  if (options && options.sort) results = results.sort();
+  if (options.clean) {
+    results = results.filter(it => it !== null && it !== undefined && it !== "");
+  }
+
+  if (options.unique || options.sort || options.stringify) {
+    results = results.map(it => [it, stringify(it)]);
+
+    // sort results by string version
+    if (options.sort) {
+      results = results.sort((a, b) => (a[1] > b[1] ? 1 : a[1] < b[1] ? -1 : 0));
+    }
+
+    if (options.unique) {
+      results = results.filter(
+        ([_, str], i) => results.slice(0, i).filter(([_, substr]) => str === substr).length === 0
+      );
+    }
+
+    results = results.map(([it, str]) => (options.stringify ? str : it));
+  }
 
   return results;
 }
@@ -70,8 +90,17 @@ function findPaths(obj, { debug = false, prev = "", sep = "." } = {}) {
   let paths = new Set();
   if (Array.isArray(obj)) {
     obj.forEach(item => {
-      for (let el of findPaths(item, { prev: prev ? prev + sep : "", sep })) {
-        paths.add(el);
+      const found = findPaths(item, { prev: prev ? prev + sep : "", sep });
+      if (found.size === 0) {
+        if (Array.isArray(item) && item.length > 0) {
+          if (prev) {
+            paths.add(prev);
+          }
+        }
+      } else {
+        for (let el of found) {
+          paths.add(el);
+        }
       }
     });
   } else if (typeof obj === "object") {
@@ -79,8 +108,23 @@ function findPaths(obj, { debug = false, prev = "", sep = "." } = {}) {
       const value = obj[key];
       if (Array.isArray(value)) {
         value.forEach(item => {
-          for (let el of findPaths(item, { prev: (prev ? prev + sep : "") + key, sep })) {
-            paths.add(el);
+          if (Array.isArray(item)) {
+            if (item.length > 0) {
+              const found = findPaths(item, { prev: (prev ? prev + sep : "") + key, sep });
+              if (found.size === 0) {
+                paths.add((prev ? prev + sep : "") + key);
+              } else {
+                for (let el of found) {
+                  paths.add(el);
+                }
+              }
+            }
+          } else if (typeof item === "object") {
+            for (let el of findPaths(item, { prev: (prev ? prev + sep : "") + key, sep })) {
+              paths.add(el);
+            }
+          } else {
+            paths.add((prev ? prev + sep : "") + key);
           }
         });
       } else if (typeof value === "object") {
