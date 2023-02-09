@@ -15,7 +15,7 @@ test("array item property", ({ eq }) => {
   eq(get(data, "releases.name", { sort: false }).slice(0, 3), ["usasearch", "cron_scripts", "mobile-fu"]);
 });
 
-test("releases.permissions.licenses", ({ eq }) => {
+test("releases.permissions.licenses.name", ({ eq }) => {
   eq(Array.from(new Set(get(data, "releases.permissions.licenses.name"))).sort(), [
     "CC0 1.0 Universal",
     "PD",
@@ -80,6 +80,7 @@ test("list paths", ({ eq }) => {
     "releases.governmentWideReuseProject",
     "releases.homepageURL",
     "releases.laborHours",
+    "releases.languages",
     "releases.license",
     "releases.name",
     "releases.openSourceProject",
@@ -88,6 +89,7 @@ test("list paths", ({ eq }) => {
     "releases.permissions.licenses.name",
     "releases.permissions.usageType",
     "releases.repositoryURL",
+    "releases.tags",
     "releases.vcs",
     "version"
   ]);
@@ -102,6 +104,7 @@ test("list paths with separator", ({ eq }) => {
     "releases__governmentWideReuseProject",
     "releases__homepageURL",
     "releases__laborHours",
+    "releases__languages",
     "releases__license",
     "releases__name",
     "releases__openSourceProject",
@@ -110,6 +113,7 @@ test("list paths with separator", ({ eq }) => {
     "releases__permissions__licenses__name",
     "releases__permissions__usageType",
     "releases__repositoryURL",
+    "releases__tags",
     "releases__vcs",
     "version"
   ]);
@@ -120,4 +124,42 @@ test("list then get", ({ eq }) => {
   paths.forEach(path => {
     eq(get(data, path, { unique: true }).length >= 1, true);
   });
+});
+
+test("geojson point", ({ eq }) => {
+  const point = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [125.6, 10.1]
+    },
+    properties: {
+      name: "Dinagat Islands"
+    }
+  };
+  eq(listPaths(point), ["geometry.coordinates", "geometry.type", "properties.name", "type"]);
+});
+
+test("multipoint geometry", ({ eq }) => {
+  // from https://www.rfc-editor.org/rfc/rfc7946#appendix-A.4
+  const multipoint = {
+    type: "MultiPoint",
+    coordinates: [
+      [100.0, 0.0],
+      [101.0, 1.0]
+    ]
+  };
+  // eq(listPaths(multipoint), ["coordinates", "type"]);
+});
+
+test("clean", ({ eq }) => {
+  eq(get(data, "releases.permissions.licenses", { clean: true }).includes(null), false);
+  eq(get(data, "releases.license", { clean: true }).includes(null), false);
+});
+
+test("stringify", ({ eq }) => {
+  eq(get(data, "releases.laborHours", { stringify: true, unique: true }), ["0"]);
+
+  eq(get(data, "releases.permissions", { stringify: true, unique: true }));
+  ["0", "200", "12345"]; // converts objects to strings
 });
