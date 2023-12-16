@@ -1,6 +1,8 @@
 function get(data, path, options) {
   if (!options) options = {};
 
+  const lstrip = (str, chr) => (str[0] === chr ? str.substring(1) : str);
+
   const stringify = it => (typeof it === "object" ? JSON.stringify(it) : "" + it);
 
   if (typeof path === "string") {
@@ -13,14 +15,17 @@ function get(data, path, options) {
 
     if (seps.length > 1) {
       return seps.reduce((acc, sep) => {
-        const subresults = get(data, path.split(sep), options);
+        const split = lstrip(path, sep).split(sep);
+        const subresults = get(data, split, options);
         return subresults.length > acc.length ? subresults : acc;
       }, []);
     } else if (seps.length === 1) {
-      path = path.split(seps[0]);
+      const sep = seps[0];
+      path = lstrip(path, sep).split(sep);
     }
   } else {
     path = Array.prototype.slice.call(path); // clone
+    if (path[0] === "") path.shift(); // remove initial blank string
   }
 
   let previous = [data];

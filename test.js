@@ -11,6 +11,14 @@ test("key", ({ eq }) => {
   eq(get(data, "agency"), ["GSA"]);
 });
 
+test("initial dot", ({ eq }) => {
+  eq(get(data, ".agency"), ["GSA"]);
+});
+
+test("initial empty", ({ eq }) => {
+  eq(get(data, ["", "agency"]), ["GSA"]);
+});
+
 test("array item property", ({ eq }) => {
   eq(get(data, "releases.name", { sort: false }).slice(0, 3), ["usasearch", "cron_scripts", "mobile-fu"]);
 });
