@@ -2,7 +2,7 @@
   "name": "sendero",
   "version": "0.1.0",
   "description": "Data Filtering for Humans",
-  "main": "sendero.js",
+  "main": "./sendero.js",
   "files": [
     "sendero.js"
   ],
